@@ -6,4 +6,4 @@ resources:
 
 images:
   - name: shalevnatan6/nadland-frontend
-    newTag: latest
+    newTag: 0fe7ef41de8443de3f247ceaca62f3817d577046
