@@ -4,7 +4,7 @@ metadata:
   name: frontend
   namespace: frontend-prod
   annotations:
-    cert-manager.io/cluster-issuer: letsencrypt-prod
+    cert-manager.io/cluster-issuer: duckdns-letsencrypt-prod
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
 spec:
   ingressClassName: traefik
