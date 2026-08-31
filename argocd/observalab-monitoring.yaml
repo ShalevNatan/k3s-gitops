@@ -1,0 +1,17 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: observalab-monitoring
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/ShalevNatan/k3s-gitops
+    targetRevision: main
+    path: infrastructure/monitoring
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: observalab
+  syncPolicy:
+    automated:
+      selfHeal: false
