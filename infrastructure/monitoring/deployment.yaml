@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prometheus
+  namespace: observalab
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: prometheus
+  template:
+    metadata:
+      labels:
+        app: prometheus          # must match selector.matchLabels exactly
+    spec:
+      serviceAccountName: prometheus
+      volumes:
+        - name: config
+          configMap:
+            name: prometheus-config       # must match your ConfigMap's metadata.name
+        - name: storage
+          persistentVolumeClaim:
+            claimName: prometheus-pvc
+
+      containers:
+        - name: prometheus
+          image: prom/prometheus:v3.13.2
+          volumeMounts:
+            - name: config
+              mountPath: /etc/prometheus/prometheus.yml
+              subPath: prometheus.yml
+            - name: storage
+              mountPath: /prometheus
