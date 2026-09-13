@@ -12,7 +12,3 @@ data:
       - job_name: 'kubernetes-pods'
         kubernetes_sd_configs:
           - role: pod
-
-      - job_name: 'onprem-static'
-        static_configs:
-          - targets: ['10.0.0.5:9100']
