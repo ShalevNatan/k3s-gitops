@@ -1,0 +1,40 @@
+# SRE Playground (Golden Signals Lab), source: ShalevNatan/sre-playground
+# (deploy/argocd/sre-playground.yaml, reviewed). Runbook: docs/first-deployment.md there.
+#
+# The `root` Application syncs this directory automatically (prune + selfHeal), so it
+# creates and owns this Application object. This Application itself has NO `automated`
+# block: nothing is deployed or pruned until someone runs a manual, reviewed sync.
+#
+# Deliberate differences from the other Applications in argocd/:
+# - manual sync only (no automated sync, prune or self-heal);
+# - targetRevision pinned to a full commit SHA: moving sre-playground `main` never
+#   changes what is deployed; promotion = editing this one line in a reviewed PR;
+# - SSH repoURL: private repository, read through a read-only deploy key
+#   (Argo CD repository Secret `repo-sre-playground`, not stored in Git).
+# The image is pinned by digest in the source overlay at that commit:
+#   ghcr.io/shalevnatan/sre-playground@sha256:d003bdc98864304efc77b062c4c9c2b9d4e9e84ae2d44e3f3abffa0ea66d8da1
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: sre-playground
+  namespace: argocd
+  # No `resources-finalizer.argocd.argoproj.io`: if root prunes this object (file
+  # removed or renamed), the workloads and Secrets are NOT deleted.
+spec:
+  project: default
+  source:
+    repoURL: git@github.com:ShalevNatan/sre-playground.git
+    targetRevision: 450837c0e18442950a8e998bf35d5a7b1376fd8d
+    path: deploy/kubernetes/overlays/lab
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: sre-playground
+  syncPolicy:
+    # Intentionally no `automated:` block: no auto-sync, no auto-prune, no self-heal.
+    syncOptions:
+      # The Namespace (with Pod Security labels) is part of the manifests.
+      - CreateNamespace=false
+      # When pruning is chosen in a later manual sync, prune after everything else.
+      - PruneLast=true
+      - PrunePropagationPolicy=foreground
+  revisionHistoryLimit: 5
